@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch and Chat Together</title>
+
+  <!-- Firebase JS SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    #video-container {
+      width: 80%;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+    }
+
+    #chat {
+      width: 80%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #messages {
+      height: 200px;
+      overflow-y: auto;
+      background-color: white;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    #input-container {
+      display: flex;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="video-container">
+    <!-- Google Drive ভিডিও এম্বেড -->
+    <iframe src="https://drive.google.com/file/d/VIDEO_ID/preview" allow="autoplay"></iframe>
+  </div>
+
+  <div id="chat">
+    <div id="messages"></div>
+    <div id="input-container">
+      <input type="text" id="messageInput" placeholder="মেসেজ টাইপ করুন...">
+      <button onclick="sendMessage()">পাঠান</button>
+    </div>
+  </div>
+
+  <script>
+    // Firebase কনফিগারেশন
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKUdMryh6loWOCRBkxlF-SfPxszS5__7g",
+      authDomain: "watch-and-talk-bb4d3.firebaseapp.com",
+      databaseURL: "https://watch-and-talk-bb4d3-default-rtdb.firebaseio.com",
+      projectId: "watch-and-talk-bb4d3",
+      storageBucket: "watch-and-talk-bb4d3.appspot.com",
+      messagingSenderId: "802826158158",
+      appId: "1:802826158158:web:8b91439d7489f5bc67431f",
+      measurementId: "G-F3EG7VSDCJ"
+    };
+
+    // Firebase ইনিশিয়ালাইজ করা
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // মেসেজ পাঠানোর ফাংশন
+    function sendMessage() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+
+      if (message) {
+        // মেসেজ Firebase ডাটাবেসে পাঠান
+        database.ref('messages').push({
+          message: message,
+          timestamp: Date.now()
+        });
+
+        messageInput.value = ''; // ইনপুট ফাঁকা করা
+      }
+    }
+
+    // রিয়েল-টাইমে মেসেজ দেখানোর ফাংশন
+    const messagesDiv = document.getElementById('messages');
+    database.ref('messages').on('child_added', (snapshot) => {
+      const data = snapshot.val();
+      const messageElement = document.createElement('div');
+      const time = new Date(data.timestamp).toLocaleTimeString();
+
+      messageElement.textContent = `[${time}] ${data.message}`;
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight; // সর্বশেষ মেসেজে স্ক্রল করুন
+    });
+  </script>
+
+</body>
+</html>
